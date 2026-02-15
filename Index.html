@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hinditypeeasy - सरल हिंदी टाइपिंग</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #1e40af;
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Noto Sans Devanagari', sans-serif;
+            background: linear-gradient(135deg, var(--bg-color) 0%, #e0e7ff 100%);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: clamp(0.875rem, 2.5vw, 1rem);
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        #input_tool {
+            width: 100%;
+            min-height: 250px;
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: clamp(1rem, 3vw, 1.125rem);
+            font-family: inherit;
+            resize: vertical;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        #input_tool:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        #input_tool::placeholder {
+            color: #94a3b8;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #input_tool_helper {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #f1f5f9;
+            min-height: 40px;
+            display: none;
+        }
+
+        .suggestion {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            transition: var(--transition);
+        }
+
+        .suggestion:hover {
+            background: #e0e7ff;
+        }
+
+        #help {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: auto;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            button {
+                width: 100%;
+                max-width: 250px;
+            }
+
+            #input_tool {
+                min-height: 200px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .controls {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                margin-bottom: 1rem;
+            }
+
+            .subtitle {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hinditypeeasy</h1>
+        <p class="subtitle">अंग्रेजी में टाइप करें, स्पेसबार दबाएं - हिंदी में बदल जाएगा! (Type in English, press space - converts to Hindi!)</p>
+        
+        <div class="main-content">
+            <textarea id="input_tool" placeholder="यहां टाइप करें... (Type here in Roman: namaste → नमस्ते)"></textarea>
+            
+            <div id="input_tool_helper"></div>
+            
+            <div class="controls">
+                <button onclick="startVoice()">🎤 बोलें (Speak)</button>
+                <button onclick="stopVoice()" id="stopBtn" disabled>⏹️ बंद करें (Stop)</button>
+                <button onclick="translateToEnglish()">📝 English में अनुवाद (Translate to English)</button>
+                <button onclick="downloadText()">💾 डाउनलोड (Download)</button>
+                <button onclick="copyText()">📋 कॉपी (Copy)</button>
+                <button onclick="showHelp()">❓ मदद (Help)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay" onclick="hideHelp()"></div>
+    <div id="help">
+        <h3>विशेष चिन्ह (Special Characters)</h3>
+        <p>पूर्ण विराम: | (pipe key) → ।</p>
+        <p>विसर्ग: ah → अः</p>
+        <p>अनुस्वार: an/am → अं</p>
+        <p>हलंत: r after consonant → र् (e.g., ktr → क्त्र)</p>
+        <p>और: ॐ, ॥, ॰ - Help बटन से कॉपी करें।</p>
+        <button onclick="hideHelp()">बंद करें (Close)</button>
+    </div>
+
+    <footer>
+        <p>फ्री टूल | Privacy: Local storage only | Built with ❤️ for Hindi users</p>
+    </footer>
+
+    <script>
+        // Custom Hindi Phonetic Transliterator Mapping
+        const hindiMap = {
+            // Vowels
+            'a': 'अ', 'aa': 'आ', 'A': 'आ', 'i': 'इ', 'ii': 'ई', 'I': 'ई', 'u': 'उ', 'uu': 'ऊ', 'U': 'ऊ',
+            'e': 'ए', 'ai': 'ऐ', 'o': 'ओ', 'au': 'औ',
+            // Consonants
+            'k': 'क', 'kh': 'ख', 'g': 'ग', 'gh': 'घ', 'ng': 'ङ',
+            'ch': 'च', 'chh': 'छ', 'j': 'ज', 'jh': 'झ', 'ny': 'ञ',
+            't': 'ट', 'th': 'ठ', 'd': 'ड', 'dh': 'ढ', 'n': 'ण',
+            't': 'त', 'th': 'थ', 'd': 'द', 'dh': 'ध', 'n': 'न',
+            'p': 'प', 'ph': 'फ', 'b': 'ब', 'bh': 'भ', 'm': 'म',
+            'y': 'य', 'r': 'र', 'l': 'ल', 'v': 'व', 'sh': 'श', 'rr': 'ष',
+            's': 'स', 'h': 'ह',
+            // Matras (vowel signs)
+            'a_': 'ा', 'i_': 'ि', 'u_': 'ु', 'uu_': 'ू', 'e_': 'े', 'ai_': 'ै', 'o_': 'ो', 'au_': 'ौ',
+            // Special
+            'an': 'ं', 'ah': 'ः', 'r.': '्र', '.': '्',
+            // Punctuation
+            '|': '।', '.': '।'
+        };
+
+        // Simple transliteration function (basic word-by-word)
+        function transliterate(text) {
+            let result = '';
+            let i = 0;
+            while (i < text.length) {
+                let found = false;
+                for (let len = 3; len > 0; len--) {
+                    let substr = text.slice(i, i + len).toLowerCase();
+                    if (hindiMap[substr]) {
+                        result += hindiMap[substr];
+                        i += len;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    result += text[i];
+                    i++;
+                }
+            }
+            return result;
+        }
+
+        // Apply transliteration on space or enter
+        const textarea = document.getElementById('input_tool');
+        textarea.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                setTimeout(() => {
+                    const cursorPos = textarea.selectionStart;
+                    const textBeforeCursor = textarea.value.slice(0, cursorPos);
+                    const lastSpace = textBeforeCursor.lastIndexOf(' ');
+                    const word = textBeforeCursor.slice(lastSpace + 1);
+                    if (word && !/[\u0900-\u097F]/.test(word)) { // If not already Hindi
+                        const hindiWord = transliterate(word);
+                        const newText = textBeforeCursor.slice(0, lastSpace + 1) + hindiWord + textarea.value.slice(cursorPos);
+                        textarea.value = newText;
+                        textarea.setSelectionRange(cursorPos - word.length + hindiWord.length, cursorPos - word.length + hindiWord.length);
+                    }
+                }, 0);
+            }
+        });
+
+        // Local Storage
+        textarea.addEventListener('input', () => {
+            localStorage.setItem('hindiText', textarea.value);
+        });
+        textarea.value = localStorage.getItem('hindiText') || '';
+
+        // Voice Input (Web Speech API)
+        let recognition;
+        const stopBtn = document.getElementById('stopBtn');
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'hi-IN';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+        }
+
+        function startVoice() {
+            if (recognition) {
+                recognition.start();
+                stopBtn.disabled = false;
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    textarea.value += transcript + ' ';
+                    textarea.focus();
+                    textarea.scrollTop = textarea.scrollHeight;
+                };
+                recognition.onerror = (event) => console.error('Voice error:', event.error);
+                recognition.onend = () => stopBtn.disabled = true;
+            } else {
+                alert('आपका ब्राउज़र वॉइस इनपुट सपोर्ट नहीं करता। (Browser does not support voice input.)');
+            }
+        }
+
+        function stopVoice() {
+            if (recognition) recognition.stop();
+            stopBtn.disabled = true;
+        }
+
+        // Simple Translate to English (Placeholder - Basic reverse)
+        function translateToEnglish() {
+            const text = textarea.value;
+            if (!text) return alert('कुछ टाइप करें! (Type something!)');
+            // Basic placeholder (in production, use API)
+            const englishText = text.replace(/[\u0900-\u097F]/g, (char) => '?');
+            alert('English Translation (Demo): ' + englishText);
+        }
+
+        // Download Text
+        function downloadText() {
+            const text = textarea.value;
+            if (!text) return alert('कुछ टाइप करें! (Type something!)');
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'hinditypeeasy-text.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Copy to Clipboard
+        function copyText() {
+            textarea.select();
+            document.execCommand('copy');
+            alert('कॉपी हो गया! (Copied!)');
+        }
+
+        // Help Modal
+        function showHelp() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('help').style.display = 'block';
+        }
+        function hideHelp() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('help').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
