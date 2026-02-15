@@ -34,16 +34,8 @@
         .container { max-width: 960px; margin: 0 auto; width: 100%; flex: 1; }
 
         header { text-align: center; margin: 2rem 0 1.5rem; }
-        h1 {
-            font-size: clamp(1.8rem, 5vw, 2.8rem);
-            color: var(--primary);
-            font-weight: 700;
-        }
-        .tagline {
-            font-size: clamp(0.95rem, 3vw, 1.1rem);
-            color: var(--muted);
-            margin-top: 0.5rem;
-        }
+        h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); color: var(--primary); font-weight: 700; }
+        .tagline { font-size: clamp(0.95rem, 3vw, 1.1rem); color: var(--muted); margin-top: 0.5rem; }
 
         .editor-card {
             background: var(--card);
@@ -153,7 +145,6 @@
             margin-top: auto;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 640px) {
             .editor-card { padding: 1rem; }
             .toolbar { flex-direction: column; align-items: stretch; }
@@ -172,7 +163,7 @@
 
         <div class="editor-card">
             <div class="editor-wrapper">
-                <textarea id="roman-input" placeholder="यहाँ अंग्रेजी में टाइप करें... (namaste → नमस्ते)" autofocus></textarea>
+                <textarea id="roman-input" placeholder="यहाँ अंग्रेजी में टाइप करें... (mera naam jeetu hai → मैं नाम जीतु है)" autofocus></textarea>
                 <div id="hindi-preview"></div>
             </div>
 
@@ -191,43 +182,56 @@
         <div class="modal" onclick="event.stopPropagation()">
             <h2 style="margin-bottom:1rem;">कैसे इस्तेमाल करें?</h2>
             <ul style="list-style:disc; padding-left:1.5rem; line-height:1.8;">
-                <li>अंग्रेजी कीबोर्ड से टाइप करें (जैसे "mera naam jeetu hai")</li>
-                <li>हिंदी ऑटोमैटिक दिखेगी – बैकस्पेस से ठीक करें</li>
-                <li>उदाहरण: "aap kaise ho" → "आप कैसे हो"</li>
-                <li>विशेष: "kh" = ख, "sh" = श, "gya" = ज्ञ, "rr" = ऋ</li>
-                <li>मोबाइल पर भी वॉइस सपोर्ट उपलब्ध (Chrome बेहतर काम करता है)</li>
+                <li>सामान्य हिंदी स्टाइल में टाइप करें (mera thik hoon, aap kaise ho)</li>
+                <li>हिंदी ऑटो दिखेगी – बैकस्पेस से सुधारें</li>
+                <li>अगर कुछ गलत आए तो स्पेस दबाकर दोबारा टाइप करें</li>
+                <li>वॉइस: बोलें, हिंदी टेक्स्ट बनेगा (Chrome में बेहतर)</li>
             </ul>
             <button class="btn" style="margin-top:1.5rem; width:100%;" onclick="closeHelp()">बंद करें</button>
         </div>
     </div>
 
-    <footer>© 2026 Hinditypeeasy – पूरी तरह फ्री & प्राइवेट (सिर्फ ब्राउज़र में)</footer>
+    <footer>© 2026 Hinditypeeasy – फ्री, प्राइवेट, ब्राउज़र में ही सब</footer>
 
     <script>
         const roman = document.getElementById('roman-input');
         const preview = document.getElementById('hindi-preview');
 
+        // Basic post-processing for better Hindi (schwa deletion approximation)
+        function improveHindiForCasual(text) {
+            // Remove unnecessary halant at word end or before vowels in casual Hindi
+            text = text.replace(/्$/gm, ''); // trailing virama
+            text = text.replace(/्([कखगघचछजझटठडढतथदधपफबभमयरलवशषसह])/g, '$1'); // simplify some conjuncts
+            return text;
+        }
+
         function updateHindi() {
-            const text = roman.value;
+            let text = roman.value.trim();
+            let hindi = '';
             try {
-                preview.textContent = Sanscript.t(text, 'itrans', 'devanagari');
+                hindi = Sanscript.t(text, 'itrans', 'devanagari');
+                hindi = improveHindiForCasual(hindi);
             } catch (e) {
-                preview.textContent = text; // fallback
+                hindi = text; // fallback
             }
+            preview.textContent = hindi;
             localStorage.setItem('hinditypeeasy', roman.value);
         }
 
         roman.addEventListener('input', updateHindi);
-        roman.addEventListener('scroll', () => { preview.scrollTop = roman.scrollTop; preview.scrollLeft = roman.scrollLeft; });
+        roman.addEventListener('scroll', () => {
+            preview.scrollTop = roman.scrollTop;
+            preview.scrollLeft = roman.scrollLeft;
+        });
 
-        // Load saved text
+        // Load saved
         const saved = localStorage.getItem('hinditypeeasy');
         if (saved) {
             roman.value = saved;
             updateHindi();
         }
 
-        // Voice
+        // Voice (same as before)
         let recog;
         const stopBtn = document.getElementById('stop-voice');
         if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
@@ -240,7 +244,7 @@
                 for (let i = e.resultIndex; i < e.results.length; i++) {
                     t += e.results[i][0].transcript;
                 }
-                roman.value += t;
+                roman.value += t + ' ';
                 updateHindi();
                 roman.scrollTop = roman.scrollHeight;
             };
@@ -248,12 +252,8 @@
         }
 
         function startVoice() {
-            if (recog) {
-                recog.start();
-                stopBtn.disabled = false;
-            } else {
-                alert('आपका ब्राउज़र वॉइस इनपुट सपोर्ट नहीं करता। Chrome इस्तेमाल करें।');
-            }
+            if (recog) { recog.start(); stopBtn.disabled = false; }
+            else alert('वॉइस सपोर्ट नहीं। Chrome इस्तेमाल करें।');
         }
 
         function stopVoice() { if (recog) recog.stop(); }
@@ -268,7 +268,7 @@
         function copyHindi() {
             const txt = preview.textContent;
             if (!txt) return alert('कुछ टाइप करें!');
-            navigator.clipboard.writeText(txt).then(() => alert('हिंदी टेक्स्ट कॉपी हो गया!'));
+            navigator.clipboard.writeText(txt).then(() => alert('कॉपी हो गया!'));
         }
 
         function downloadHindi() {
@@ -278,7 +278,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'my-hindi-text.txt';
+            a.download = 'my-hindi.txt';
             a.click();
             URL.revokeObjectURL(url);
         }
