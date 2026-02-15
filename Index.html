@@ -3,389 +3,294 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hinditypeeasy - सरल हिंदी टाइपिंग</title>
+    <title>Hinditypeeasy – आसान हिंदी टाइपिंग</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #1e40af;
-            --bg-color: #f8fafc;
-            --text-color: #1e293b;
-            --border-color: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --radius: 12px;
-            --transition: all 0.3s ease;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #f0f9ff;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 1rem;
+            --shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans Devanagari', sans-serif;
-            background: linear-gradient(135deg, var(--bg-color) 0%, #e0e7ff 100%);
-            color: var(--text-color);
-            line-height: 1.6;
+            font-family: 'Noto Sans Devanagari', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #dbeafe 100%);
+            color: var(--text);
             min-height: 100vh;
+            padding: 1rem;
             display: flex;
             flex-direction: column;
-            padding: 1rem;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            width: 100%;
-            flex: 1;
-        }
+        .container { max-width: 960px; margin: 0 auto; width: 100%; flex: 1; }
 
+        header { text-align: center; margin: 2rem 0 1.5rem; }
         h1 {
-            text-align: center;
-            color: var(--primary-color);
-            font-size: clamp(1.5rem, 4vw, 2.5rem);
-            margin-bottom: 0.5rem;
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            color: var(--primary);
             font-weight: 700;
         }
-
-        .subtitle {
-            text-align: center;
-            font-size: clamp(0.875rem, 2.5vw, 1rem);
-            color: #64748b;
-            margin-bottom: 2rem;
+        .tagline {
+            font-size: clamp(0.95rem, 3vw, 1.1rem);
+            color: var(--muted);
+            margin-top: 0.5rem;
         }
 
-        .main-content {
-            background: white;
+        .editor-card {
+            background: var(--card);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            padding: 2rem;
+            padding: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        .typing-area {
+        .editor-wrapper {
             position: relative;
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .editor-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.15);
         }
 
         #roman-input {
             width: 100%;
-            min-height: 200px;
-            padding: 1.5rem;
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius);
-            font-size: clamp(1rem, 3vw, 1.125rem);
-            font-family: inherit;
-            resize: vertical;
-            transition: var(--transition);
-            outline: none;
-            opacity: 0.5; /* Semi-transparent for Roman input */
-        }
-
-        #roman-input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        #hindi-output {
-            position: absolute;
-            top: 1.5rem;
-            left: 1.5rem;
-            right: 1.5rem;
-            bottom: 1.5rem;
-            padding: 0;
+            min-height: 220px;
+            padding: 1.25rem;
+            font-size: clamp(1.05rem, 3.2vw, 1.2rem);
+            line-height: 1.7;
             border: none;
+            resize: vertical;
+            outline: none;
             background: transparent;
-            font-size: inherit;
-            font-family: 'Noto Sans Devanagari', sans-serif;
+            font-family: inherit;
+            color: transparent;
+            caret-color: var(--text);
+            z-index: 2;
+            position: relative;
+        }
+
+        #hindi-preview {
+            position: absolute;
+            inset: 1.25rem;
+            pointer-events: none;
             white-space: pre-wrap;
             overflow-wrap: break-word;
-            pointer-events: none;
-            color: var(--text-color);
-            line-height: 1.6;
+            font-size: inherit;
+            line-height: inherit;
+            color: var(--text);
+            user-select: none;
         }
 
-        #hindi-output::placeholder {
-            color: #94a3b8;
-        }
+        #roman-input::placeholder { color: #94a3b8; }
 
-        .controls {
+        .toolbar {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.75rem;
+            gap: 0.8rem;
             justify-content: center;
-            margin: 2rem 0;
+            margin: 1.5rem 0;
         }
 
-        button {
-            background: var(--primary-color);
+        .btn {
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.875rem;
+            padding: 0.8rem 1.6rem;
+            border-radius: 0.6rem;
+            font-size: 0.95rem;
             font-weight: 500;
-            transition: var(--transition);
-            display: flex;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            min-width: 120px;
+            min-width: 130px;
             justify-content: center;
         }
 
-        button:hover:not(:disabled) {
-            background: var(--secondary-color);
-            transform: translateY(-1px);
-        }
+        .btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
 
-        button:disabled {
-            background: #cbd5e1;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        #help {
-            display: none;
+        .modal-overlay {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 2rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
             z-index: 1000;
-            max-width: 90vw;
-            max-height: 80vh;
-            overflow-y: auto;
         }
 
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+        .modal {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            max-width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
         }
 
         footer {
             text-align: center;
-            padding: 1rem;
-            font-size: 0.875rem;
-            color: #64748b;
+            padding: 1.5rem 0;
+            color: var(--muted);
+            font-size: 0.9rem;
             margin-top: auto;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            body {
-                padding: 0.5rem;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            .controls {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            button {
-                width: 100%;
-                max-width: 250px;
-            }
-
-            #roman-input {
-                min-height: 150px;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .controls {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                margin-bottom: 1rem;
-            }
-
-            .subtitle {
-                margin-bottom: 1rem;
-            }
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .editor-card { padding: 1rem; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; }
+            #roman-input { min-height: 180px; }
         }
     </style>
-    <!-- Open-source Indic Transliteration Library (Sanscript) -->
     <script src="https://cdn.jsdelivr.net/npm/@indic-transliteration/sanscript@1.4.0/sanscript.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Hinditypeeasy</h1>
-        <p class="subtitle">अंग्रेजी में टाइप करें - हिंदी रीयल-टाइम में दिखेगा! (Type in English - Hindi appears in real-time!)</p>
-        
-        <div class="main-content">
-            <div class="typing-area">
-                <textarea id="roman-input" placeholder="अंग्रेजी में टाइप करें (Type in Roman: namaste → नमस्ते appears automatically)"></textarea>
-                <div id="hindi-output" contenteditable="false"></div>
+        <header>
+            <h1>Hinditypeeasy</h1>
+            <p class="tagline">अंग्रेजी में टाइप करें – हिंदी तुरंत दिखेगी (Real-time Roman to Hindi)</p>
+        </header>
+
+        <div class="editor-card">
+            <div class="editor-wrapper">
+                <textarea id="roman-input" placeholder="यहाँ अंग्रेजी में टाइप करें... (namaste → नमस्ते)" autofocus></textarea>
+                <div id="hindi-preview"></div>
             </div>
-            
-            <div class="controls">
-                <button onclick="startVoice()">🎤 बोलें (Speak)</button>
-                <button onclick="stopVoice()" id="stopBtn" disabled>⏹️ बंद करें (Stop)</button>
-                <button onclick="clearText()">🗑️ साफ़ करें (Clear)</button>
-                <button onclick="copyText()">📋 कॉपी हिंदी (Copy Hindi)</button>
-                <button onclick="downloadText()">💾 डाउनलोड (Download)</button>
-                <button onclick="showHelp()">❓ मदद (Help)</button>
+
+            <div class="toolbar">
+                <button class="btn" onclick="startVoice()">🎤 बोलकर टाइप करें</button>
+                <button class="btn" id="stop-voice" disabled onclick="stopVoice()">⏹️ रोकें</button>
+                <button class="btn" onclick="clearAll()">🧹 साफ करें</button>
+                <button class="btn" onclick="copyHindi()">📋 हिंदी कॉपी</button>
+                <button class="btn" onclick="downloadHindi()">⬇️ डाउनलोड</button>
+                <button class="btn" onclick="openHelp()">ℹ️ मदद</button>
             </div>
         </div>
     </div>
 
-    <div id="overlay" onclick="hideHelp()"></div>
-    <div id="help">
-        <h3>उपयोग कैसे करें (How to Use)</h3>
-        <p><strong>रीयल-टाइम टाइपिंग:</strong> "namaste" टाइप करें → "नमस्ते" तुरंत दिखेगा। बैकस्पेस से संपादित करें।</p>
-        <p><strong>विशेष:</strong> "aa" → आ, "kh" → ख, "sh" → श। स्पेस पर शब्द फिक्स होता है।</p>
-        <p><strong>उदाहरण:</strong> "main hindustan se hoon" → "मैं हिंदुस्तान से हूँ"।</p>
-        <button onclick="hideHelp()">बंद करें (Close)</button>
+    <div class="modal-overlay" id="help-modal" onclick="closeHelp(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h2 style="margin-bottom:1rem;">कैसे इस्तेमाल करें?</h2>
+            <ul style="list-style:disc; padding-left:1.5rem; line-height:1.8;">
+                <li>अंग्रेजी कीबोर्ड से टाइप करें (जैसे "mera naam jeetu hai")</li>
+                <li>हिंदी ऑटोमैटिक दिखेगी – बैकस्पेस से ठीक करें</li>
+                <li>उदाहरण: "aap kaise ho" → "आप कैसे हो"</li>
+                <li>विशेष: "kh" = ख, "sh" = श, "gya" = ज्ञ, "rr" = ऋ</li>
+                <li>मोबाइल पर भी वॉइस सपोर्ट उपलब्ध (Chrome बेहतर काम करता है)</li>
+            </ul>
+            <button class="btn" style="margin-top:1.5rem; width:100%;" onclick="closeHelp()">बंद करें</button>
+        </div>
     </div>
 
-    <footer>
-        <p>फ्री, रीयल-टाइम हिंदी टूल | Privacy: Local only | Made with ❤️</p>
-    </footer>
+    <footer>© 2026 Hinditypeeasy – पूरी तरह फ्री & प्राइवेट (सिर्फ ब्राउज़र में)</footer>
 
     <script>
-        // Real-time transliteration setup using Sanscript
-        const romanInput = document.getElementById('roman-input');
-        const hindiOutput = document.getElementById('hindi-output');
+        const roman = document.getElementById('roman-input');
+        const preview = document.getElementById('hindi-preview');
 
-        // Function to transliterate Roman to Hindi (using ITRANS scheme)
-        function transliterateToHindi(romanText) {
-            if (!romanText) return '';
+        function updateHindi() {
+            const text = roman.value;
             try {
-                // Sanscript transliterates from ITRANS to Devanagari
-                return Sanscript.t(romanText, 'itrans', 'devanagari');
+                preview.textContent = Sanscript.t(text, 'itrans', 'devanagari');
             } catch (e) {
-                console.error('Transliteration error:', e);
-                return romanText; // Fallback to original
+                preview.textContent = text; // fallback
             }
+            localStorage.setItem('hinditypeeasy', roman.value);
         }
 
-        // Real-time update on input
-        romanInput.addEventListener('input', (e) => {
-            const romanText = e.target.value;
-            const hindiText = transliterateToHindi(romanText);
-            hindiOutput.textContent = hindiText;
+        roman.addEventListener('input', updateHindi);
+        roman.addEventListener('scroll', () => { preview.scrollTop = roman.scrollTop; preview.scrollLeft = roman.scrollLeft; });
 
-            // Sync scrolling
-            hindiOutput.scrollTop = romanInput.scrollTop;
-            hindiOutput.scrollLeft = romanInput.scrollLeft;
-
-            // Local storage
-            localStorage.setItem('hindiText', hindiText);
-        });
-
-        // Load from local storage on start
-        const savedHindi = localStorage.getItem('hindiText') || '';
-        if (savedHindi) {
-            // Reverse transliterate for Roman input (approximate)
-            const savedRoman = Sanscript.t(savedHindi, 'devanagari', 'itrans');
-            romanInput.value = savedRoman;
-            hindiOutput.textContent = savedHindi;
+        // Load saved text
+        const saved = localStorage.getItem('hinditypeeasy');
+        if (saved) {
+            roman.value = saved;
+            updateHindi();
         }
 
-        // Voice Input (Web Speech API)
-        let recognition;
-        const stopBtn = document.getElementById('stopBtn');
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.lang = 'hi-IN';
-            recognition.interimResults = true; // For real-time feel
-            recognition.maxAlternatives = 1;
+        // Voice
+        let recog;
+        const stopBtn = document.getElementById('stop-voice');
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recog = new SR();
+            recog.lang = 'hi-IN';
+            recog.interimResults = true;
+            recog.onresult = e => {
+                let t = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    t += e.results[i][0].transcript;
+                }
+                roman.value += t;
+                updateHindi();
+                roman.scrollTop = roman.scrollHeight;
+            };
+            recog.onend = () => stopBtn.disabled = true;
         }
 
         function startVoice() {
-            if (recognition) {
-                recognition.start();
+            if (recog) {
+                recog.start();
                 stopBtn.disabled = false;
-                recognition.onresult = (event) => {
-                    let transcript = '';
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        transcript += event.results[i][0].transcript;
-                    }
-                    romanInput.value += transcript + ' ';
-                    romanInput.dispatchEvent(new Event('input', { bubbles: true }));
-                };
-                recognition.onerror = (event) => {
-                    console.error('Voice error:', event.error);
-                    stopBtn.disabled = true;
-                };
-                recognition.onend = () => stopBtn.disabled = true;
             } else {
-                alert('वॉइस सपोर्ट नहीं है। Chrome आज़माएं। (Voice not supported. Try Chrome.)');
+                alert('आपका ब्राउज़र वॉइस इनपुट सपोर्ट नहीं करता। Chrome इस्तेमाल करें।');
             }
         }
 
-        function stopVoice() {
-            if (recognition) recognition.stop();
-            stopBtn.disabled = true;
+        function stopVoice() { if (recog) recog.stop(); }
+
+        function clearAll() {
+            roman.value = '';
+            preview.textContent = '';
+            localStorage.removeItem('hinditypeeasy');
+            roman.focus();
         }
 
-        // Clear text
-        function clearText() {
-            romanInput.value = '';
-            hindiOutput.textContent = '';
-            localStorage.removeItem('hindiText');
+        function copyHindi() {
+            const txt = preview.textContent;
+            if (!txt) return alert('कुछ टाइप करें!');
+            navigator.clipboard.writeText(txt).then(() => alert('हिंदी टेक्स्ट कॉपी हो गया!'));
         }
 
-        // Copy Hindi text
-        function copyText() {
-            const hindiText = hindiOutput.textContent;
-            if (!hindiText) return alert('कुछ टाइप करें! (Type something!)');
-            navigator.clipboard.writeText(hindiText).then(() => {
-                alert('हिंदी टेक्स्ट कॉपी हो गया! (Hindi text copied!)');
-            }).catch(() => {
-                // Fallback
-                const textArea = document.createElement('textarea');
-                textArea.value = hindiText;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                alert('हिंदी टेक्स्ट कॉपी हो गया! (Hindi text copied!)');
-            });
-        }
-
-        // Download Hindi text
-        function downloadText() {
-            const hindiText = hindiOutput.textContent;
-            if (!hindiText) return alert('कुछ टाइप करें! (Type something!)');
-            const blob = new Blob([hindiText], { type: 'text/plain;charset=utf-8' });
+        function downloadHindi() {
+            const txt = preview.textContent;
+            if (!txt) return alert('कुछ टाइप करें!');
+            const blob = new Blob([txt], {type: 'text/plain;charset=utf-8'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'hinditypeeasy-hindi.txt';
+            a.download = 'my-hindi-text.txt';
             a.click();
             URL.revokeObjectURL(url);
         }
 
-        // Help Modal
-        function showHelp() {
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('help').style.display = 'block';
-        }
-        function hideHelp() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('help').style.display = 'none';
+        function openHelp() { document.getElementById('help-modal').style.display = 'flex'; }
+        function closeHelp(e) {
+            if (e.target.id === 'help-modal' || e.target.tagName === 'BUTTON') {
+                document.getElementById('help-modal').style.display = 'none';
+            }
         }
 
-        // Focus on load
-        romanInput.focus();
+        roman.focus();
     </script>
 </body>
 </html>
