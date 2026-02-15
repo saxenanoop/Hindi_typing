@@ -23,7 +23,7 @@
         }
 
         body {
-            font-family: system-ui, -apple-system, 'Noto Sans Devanagari', sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans Devanagari', sans-serif;
             background: linear-gradient(135deg, var(--bg-color) 0%, #e0e7ff 100%);
             color: var(--text-color);
             line-height: 1.6;
@@ -63,9 +63,13 @@
             margin-bottom: 2rem;
         }
 
-        #input_tool {
+        .typing-area {
+            position: relative;
+        }
+
+        #roman-input {
             width: 100%;
-            min-height: 250px;
+            min-height: 200px;
             padding: 1.5rem;
             border: 2px solid var(--border-color);
             border-radius: var(--radius);
@@ -74,14 +78,33 @@
             resize: vertical;
             transition: var(--transition);
             outline: none;
+            opacity: 0.5; /* Semi-transparent for Roman input */
         }
 
-        #input_tool:focus {
+        #roman-input:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        #input_tool::placeholder {
+        #hindi-output {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            right: 1.5rem;
+            bottom: 1.5rem;
+            padding: 0;
+            border: none;
+            background: transparent;
+            font-size: inherit;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            pointer-events: none;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        #hindi-output::placeholder {
             color: #94a3b8;
         }
 
@@ -119,27 +142,6 @@
             background: #cbd5e1;
             cursor: not-allowed;
             transform: none;
-        }
-
-        #input_tool_helper {
-            margin-top: 1rem;
-            padding: 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: #f1f5f9;
-            min-height: 40px;
-            display: none;
-        }
-
-        .suggestion {
-            cursor: pointer;
-            padding: 0.5rem;
-            border-bottom: 1px solid #e2e8f0;
-            transition: var(--transition);
-        }
-
-        .suggestion:hover {
-            background: #e0e7ff;
         }
 
         #help {
@@ -197,8 +199,8 @@
                 max-width: 250px;
             }
 
-            #input_tool {
-                min-height: 200px;
+            #roman-input {
+                min-height: 150px;
             }
         }
 
@@ -218,23 +220,26 @@
             }
         }
     </style>
+    <!-- Open-source Indic Transliteration Library (Sanscript) -->
+    <script src="https://cdn.jsdelivr.net/npm/@indic-transliteration/sanscript@1.4.0/sanscript.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Hinditypeeasy</h1>
-        <p class="subtitle">अंग्रेजी में टाइप करें, स्पेसबार दबाएं - हिंदी में बदल जाएगा! (Type in English, press space - converts to Hindi!)</p>
+        <p class="subtitle">अंग्रेजी में टाइप करें - हिंदी रीयल-टाइम में दिखेगा! (Type in English - Hindi appears in real-time!)</p>
         
         <div class="main-content">
-            <textarea id="input_tool" placeholder="यहां टाइप करें... (Type here in Roman: namaste → नमस्ते)"></textarea>
-            
-            <div id="input_tool_helper"></div>
+            <div class="typing-area">
+                <textarea id="roman-input" placeholder="अंग्रेजी में टाइप करें (Type in Roman: namaste → नमस्ते appears automatically)"></textarea>
+                <div id="hindi-output" contenteditable="false"></div>
+            </div>
             
             <div class="controls">
                 <button onclick="startVoice()">🎤 बोलें (Speak)</button>
                 <button onclick="stopVoice()" id="stopBtn" disabled>⏹️ बंद करें (Stop)</button>
-                <button onclick="translateToEnglish()">📝 English में अनुवाद (Translate to English)</button>
+                <button onclick="clearText()">🗑️ साफ़ करें (Clear)</button>
+                <button onclick="copyText()">📋 कॉपी हिंदी (Copy Hindi)</button>
                 <button onclick="downloadText()">💾 डाउनलोड (Download)</button>
-                <button onclick="copyText()">📋 कॉपी (Copy)</button>
                 <button onclick="showHelp()">❓ मदद (Help)</button>
             </div>
         </div>
@@ -242,88 +247,56 @@
 
     <div id="overlay" onclick="hideHelp()"></div>
     <div id="help">
-        <h3>विशेष चिन्ह (Special Characters)</h3>
-        <p>पूर्ण विराम: | (pipe key) → ।</p>
-        <p>विसर्ग: ah → अः</p>
-        <p>अनुस्वार: an/am → अं</p>
-        <p>हलंत: r after consonant → र् (e.g., ktr → क्त्र)</p>
-        <p>और: ॐ, ॥, ॰ - Help बटन से कॉपी करें।</p>
+        <h3>उपयोग कैसे करें (How to Use)</h3>
+        <p><strong>रीयल-टाइम टाइपिंग:</strong> "namaste" टाइप करें → "नमस्ते" तुरंत दिखेगा। बैकस्पेस से संपादित करें।</p>
+        <p><strong>विशेष:</strong> "aa" → आ, "kh" → ख, "sh" → श। स्पेस पर शब्द फिक्स होता है।</p>
+        <p><strong>उदाहरण:</strong> "main hindustan se hoon" → "मैं हिंदुस्तान से हूँ"।</p>
         <button onclick="hideHelp()">बंद करें (Close)</button>
     </div>
 
     <footer>
-        <p>फ्री टूल | Privacy: Local storage only | Built with ❤️ for Hindi users</p>
+        <p>फ्री, रीयल-टाइम हिंदी टूल | Privacy: Local only | Made with ❤️</p>
     </footer>
 
     <script>
-        // Custom Hindi Phonetic Transliterator Mapping
-        const hindiMap = {
-            // Vowels
-            'a': 'अ', 'aa': 'आ', 'A': 'आ', 'i': 'इ', 'ii': 'ई', 'I': 'ई', 'u': 'उ', 'uu': 'ऊ', 'U': 'ऊ',
-            'e': 'ए', 'ai': 'ऐ', 'o': 'ओ', 'au': 'औ',
-            // Consonants
-            'k': 'क', 'kh': 'ख', 'g': 'ग', 'gh': 'घ', 'ng': 'ङ',
-            'ch': 'च', 'chh': 'छ', 'j': 'ज', 'jh': 'झ', 'ny': 'ञ',
-            't': 'ट', 'th': 'ठ', 'd': 'ड', 'dh': 'ढ', 'n': 'ण',
-            't': 'त', 'th': 'थ', 'd': 'द', 'dh': 'ध', 'n': 'न',
-            'p': 'प', 'ph': 'फ', 'b': 'ब', 'bh': 'भ', 'm': 'म',
-            'y': 'य', 'r': 'र', 'l': 'ल', 'v': 'व', 'sh': 'श', 'rr': 'ष',
-            's': 'स', 'h': 'ह',
-            // Matras (vowel signs)
-            'a_': 'ा', 'i_': 'ि', 'u_': 'ु', 'uu_': 'ू', 'e_': 'े', 'ai_': 'ै', 'o_': 'ो', 'au_': 'ौ',
-            // Special
-            'an': 'ं', 'ah': 'ः', 'r.': '्र', '.': '्',
-            // Punctuation
-            '|': '।', '.': '।'
-        };
+        // Real-time transliteration setup using Sanscript
+        const romanInput = document.getElementById('roman-input');
+        const hindiOutput = document.getElementById('hindi-output');
 
-        // Simple transliteration function (basic word-by-word)
-        function transliterate(text) {
-            let result = '';
-            let i = 0;
-            while (i < text.length) {
-                let found = false;
-                for (let len = 3; len > 0; len--) {
-                    let substr = text.slice(i, i + len).toLowerCase();
-                    if (hindiMap[substr]) {
-                        result += hindiMap[substr];
-                        i += len;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    result += text[i];
-                    i++;
-                }
+        // Function to transliterate Roman to Hindi (using ITRANS scheme)
+        function transliterateToHindi(romanText) {
+            if (!romanText) return '';
+            try {
+                // Sanscript transliterates from ITRANS to Devanagari
+                return Sanscript.t(romanText, 'itrans', 'devanagari');
+            } catch (e) {
+                console.error('Transliteration error:', e);
+                return romanText; // Fallback to original
             }
-            return result;
         }
 
-        // Apply transliteration on space or enter
-        const textarea = document.getElementById('input_tool');
-        textarea.addEventListener('keydown', (e) => {
-            if (e.key === ' ' || e.key === 'Enter') {
-                setTimeout(() => {
-                    const cursorPos = textarea.selectionStart;
-                    const textBeforeCursor = textarea.value.slice(0, cursorPos);
-                    const lastSpace = textBeforeCursor.lastIndexOf(' ');
-                    const word = textBeforeCursor.slice(lastSpace + 1);
-                    if (word && !/[\u0900-\u097F]/.test(word)) { // If not already Hindi
-                        const hindiWord = transliterate(word);
-                        const newText = textBeforeCursor.slice(0, lastSpace + 1) + hindiWord + textarea.value.slice(cursorPos);
-                        textarea.value = newText;
-                        textarea.setSelectionRange(cursorPos - word.length + hindiWord.length, cursorPos - word.length + hindiWord.length);
-                    }
-                }, 0);
-            }
+        // Real-time update on input
+        romanInput.addEventListener('input', (e) => {
+            const romanText = e.target.value;
+            const hindiText = transliterateToHindi(romanText);
+            hindiOutput.textContent = hindiText;
+
+            // Sync scrolling
+            hindiOutput.scrollTop = romanInput.scrollTop;
+            hindiOutput.scrollLeft = romanInput.scrollLeft;
+
+            // Local storage
+            localStorage.setItem('hindiText', hindiText);
         });
 
-        // Local Storage
-        textarea.addEventListener('input', () => {
-            localStorage.setItem('hindiText', textarea.value);
-        });
-        textarea.value = localStorage.getItem('hindiText') || '';
+        // Load from local storage on start
+        const savedHindi = localStorage.getItem('hindiText') || '';
+        if (savedHindi) {
+            // Reverse transliterate for Roman input (approximate)
+            const savedRoman = Sanscript.t(savedHindi, 'devanagari', 'itrans');
+            romanInput.value = savedRoman;
+            hindiOutput.textContent = savedHindi;
+        }
 
         // Voice Input (Web Speech API)
         let recognition;
@@ -332,7 +305,7 @@
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
             recognition.lang = 'hi-IN';
-            recognition.interimResults = false;
+            recognition.interimResults = true; // For real-time feel
             recognition.maxAlternatives = 1;
         }
 
@@ -341,15 +314,20 @@
                 recognition.start();
                 stopBtn.disabled = false;
                 recognition.onresult = (event) => {
-                    const transcript = event.results[0][0].transcript;
-                    textarea.value += transcript + ' ';
-                    textarea.focus();
-                    textarea.scrollTop = textarea.scrollHeight;
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    romanInput.value += transcript + ' ';
+                    romanInput.dispatchEvent(new Event('input', { bubbles: true }));
                 };
-                recognition.onerror = (event) => console.error('Voice error:', event.error);
+                recognition.onerror = (event) => {
+                    console.error('Voice error:', event.error);
+                    stopBtn.disabled = true;
+                };
                 recognition.onend = () => stopBtn.disabled = true;
             } else {
-                alert('आपका ब्राउज़र वॉइस इनपुट सपोर्ट नहीं करता। (Browser does not support voice input.)');
+                alert('वॉइस सपोर्ट नहीं है। Chrome आज़माएं। (Voice not supported. Try Chrome.)');
             }
         }
 
@@ -358,33 +336,42 @@
             stopBtn.disabled = true;
         }
 
-        // Simple Translate to English (Placeholder - Basic reverse)
-        function translateToEnglish() {
-            const text = textarea.value;
-            if (!text) return alert('कुछ टाइप करें! (Type something!)');
-            // Basic placeholder (in production, use API)
-            const englishText = text.replace(/[\u0900-\u097F]/g, (char) => '?');
-            alert('English Translation (Demo): ' + englishText);
+        // Clear text
+        function clearText() {
+            romanInput.value = '';
+            hindiOutput.textContent = '';
+            localStorage.removeItem('hindiText');
         }
 
-        // Download Text
+        // Copy Hindi text
+        function copyText() {
+            const hindiText = hindiOutput.textContent;
+            if (!hindiText) return alert('कुछ टाइप करें! (Type something!)');
+            navigator.clipboard.writeText(hindiText).then(() => {
+                alert('हिंदी टेक्स्ट कॉपी हो गया! (Hindi text copied!)');
+            }).catch(() => {
+                // Fallback
+                const textArea = document.createElement('textarea');
+                textArea.value = hindiText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('हिंदी टेक्स्ट कॉपी हो गया! (Hindi text copied!)');
+            });
+        }
+
+        // Download Hindi text
         function downloadText() {
-            const text = textarea.value;
-            if (!text) return alert('कुछ टाइप करें! (Type something!)');
-            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const hindiText = hindiOutput.textContent;
+            if (!hindiText) return alert('कुछ टाइप करें! (Type something!)');
+            const blob = new Blob([hindiText], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'hinditypeeasy-text.txt';
+            a.download = 'hinditypeeasy-hindi.txt';
             a.click();
             URL.revokeObjectURL(url);
-        }
-
-        // Copy to Clipboard
-        function copyText() {
-            textarea.select();
-            document.execCommand('copy');
-            alert('कॉपी हो गया! (Copied!)');
         }
 
         // Help Modal
@@ -396,6 +383,9 @@
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('help').style.display = 'none';
         }
+
+        // Focus on load
+        romanInput.focus();
     </script>
 </body>
 </html>
